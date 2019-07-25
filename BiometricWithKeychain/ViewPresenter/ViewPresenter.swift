@@ -20,7 +20,7 @@ class ViewPresenter
     private let keyForPassword = "wantToSave"
     weak var delegate: ViewPresenterDelegate?
     private var viewController: UIViewController?
-    private var passwordHandler: ManageAccountKeychain = ManageAccountKeychain()
+    private var passwordHandler: ManageAccountModel = ManageAccountKeychain()
     private var biometricHandler: BiometricLocalAuthentication = BiometricLocalAuthentication()
     
     func attachDelegate(viewController:ViewPresenterDelegate)
@@ -40,6 +40,7 @@ class ViewPresenter
     
     func logInUser(account:String,password:String)
     {
+        guard let passwordHandler = self.passwordHandler as? ManageAccountKeychain else {return}
         passwordHandler.delegate = self
         if getWantToSave()
         {
@@ -50,6 +51,8 @@ class ViewPresenter
     
     func checkIfUserHasLogged()
     {
+        guard let passwordHandler = self.passwordHandler as? ManageAccountKeychain else {return}
+
         biometricHandler.delegate = self
         passwordHandler.delegate  = self
         if getWantToSave()

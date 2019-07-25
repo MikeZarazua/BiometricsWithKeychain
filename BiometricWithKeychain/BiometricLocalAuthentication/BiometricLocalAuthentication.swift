@@ -10,12 +10,6 @@ import Foundation
 import UIKit
 import LocalAuthentication
 
-enum BioMetricSupported:String
-{
-    case touchId = "Touch ID"
-    case faceId = "Face ID"
-    case none = "none"
-}
 protocol BiometricLocalAuthenticationDelegate:class
 {
     func userAuthenticationSuccess()
@@ -39,14 +33,7 @@ class BiometricLocalAuthentication
         {
             if #available(iOS 11.0, *)
             {
-                if context.biometryType == .faceID
-                {
-                    self.evaluateTocuhIdAuthenticity(context: context, supportedBiomatericType: BioMetricSupported.faceId)
-                }
-                else if context.biometryType == .touchID
-                {
-                    self.evaluateTocuhIdAuthenticity(context: context, supportedBiomatericType: BioMetricSupported.touchId)
-                }
+                self.evaluateTocuhIdAuthenticity(context: context)
             }
         }
     }
@@ -55,12 +42,13 @@ class BiometricLocalAuthentication
      This function check if the BiometricSuported(touchId or faceId) is correct, if it is then we load the pasword form keychain and handleLogin
      
      - Parameter context: LAContext
-     - Parameter supportedBiometricType: The opntions are touchId,faceId,none
      */
-    private func evaluateTocuhIdAuthenticity(context: LAContext, supportedBiomatericType: BioMetricSupported)
+    private func evaluateTocuhIdAuthenticity(context: LAContext)
     {
         // set localiazedReason
-        let localizedReason = getLocalizedReason(biometricType: context.biometryType)
+        if #available(iOS 11.0, *) {
+            let localizedReason = getLocalizedReason(biometricType: context.biometryType)
+       
         
         context.evaluatePolicy(LAPolicy.deviceOwnerAuthentication, localizedReason: localizedReason)
         {
@@ -77,6 +65,9 @@ class BiometricLocalAuthentication
                 }
             }
         }
+        } else {
+            // Fallback on earlier versions
+        }
     }
     
     /**
@@ -84,6 +75,7 @@ class BiometricLocalAuthentication
      recevies:
      - Parameter biometricType: an LABiometricType that detemrinates the type of biometric supported by the device
      */
+    @available(iOS 11.0, *)
     func getLocalizedReason(biometricType:LABiometryType) -> String
     {
         switch biometricType {
